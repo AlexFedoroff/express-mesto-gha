@@ -18,7 +18,7 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.status(OK_STATUS).send({ card }))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_STATUS).send({ message: 'Некорректные данные в теле запроса' });
+        return res.status(BAD_REQUEST_STATUS).send({ message: `Переданы некорректные данные в теле запроса. Подробнее: ${err}` });
       }
       return res.status(SERVER_ERROR_STATUS).send({ message: `Ошибка на сервере: ${err}` });
     });
@@ -34,7 +34,7 @@ module.exports.deleteCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_STATUS).send({ message: 'Некорректные данные в параметре запроса' });
+        return res.status(BAD_REQUEST_STATUS).send({ message: `Переданы некорректные данные в параметре запроса. Подробнее: ${err}` });
       }
       return res.status(SERVER_ERROR_STATUS).send({ message: `Ошибка на сервере: ${err}` });
     });
