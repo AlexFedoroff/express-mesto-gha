@@ -49,6 +49,10 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .then((card) => {
+      if (!card) {
+        res.status(NOT_FOUND_STATUS).send({ message: 'Карточка с таким ID не найдена' });
+        return;
+      }
       res.status(OK_STATUS).send(card);
     })
     .catch((err) => {
@@ -68,6 +72,10 @@ module.exports.dislikeCard = (req, res) => {
     { new: true },
   )
     .then((card) => {
+      if (!card) {
+        res.status(NOT_FOUND_STATUS).send({ message: 'Карточка с таким ID не найдена' });
+        return;
+      }
       res.status(OK_STATUS).send(card);
     })
     .catch((err) => {
