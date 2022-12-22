@@ -17,7 +17,7 @@ module.exports.createCard = (req, res, next) => {
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные в теле запроса'));
         return;
       }
@@ -34,7 +34,7 @@ module.exports.deleteCard = (req, res, next) => {
       card.remove().then(res.send(card));
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные в параметре запроса'));
         return;
       }
@@ -54,7 +54,7 @@ module.exports.likeCard = (req, res, next) => {
       res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
         next(new BadRequestError('Некорректный id карточки!'));
         return;
       }
@@ -74,7 +74,7 @@ module.exports.dislikeCard = (req, res, next) => {
       res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
         next(new BadRequestError('Некорректный ид карточки!'));
         return;
       }

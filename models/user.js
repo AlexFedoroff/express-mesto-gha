@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { isURL } = require('validator');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -16,6 +17,7 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     required: true,
+    validate: isURL,
   },
 });
 

@@ -16,7 +16,7 @@ module.exports.createUser = (req, res, next) => {
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные в теле запроса'));
         return;
       }
@@ -34,7 +34,7 @@ module.exports.getUser = (req, res, next) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные в теле запроса'));
         return;
       }
@@ -53,7 +53,7 @@ module.exports.updateProfile = (req, res, next) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные в теле запроса'));
         return;
       }
@@ -72,7 +72,7 @@ module.exports.updateAvatar = (req, res, next) => {
       res.send({ user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные в теле запроса'));
         return;
       }

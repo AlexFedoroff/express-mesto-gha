@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { isURL } = require('validator');
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -19,6 +20,7 @@ const cardSchema = new mongoose.Schema({
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
     default: [],
+    validate: isURL,
   }],
   createdAt: {
     type: Date,
