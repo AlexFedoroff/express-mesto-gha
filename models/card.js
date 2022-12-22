@@ -11,7 +11,7 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  avatar: {
+  owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
     required: true,
