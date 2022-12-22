@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const router = require('./routes/index');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -19,9 +20,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/users', require('./routes/users'));
-app.use('/cards', require('./routes/cards'));
-
+app.use(router);
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(PORT, () => {

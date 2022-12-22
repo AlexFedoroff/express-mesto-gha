@@ -28,9 +28,10 @@ module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND_STATUS).send({ message: 'Карточка не найдена!' });
+        res.status(NOT_FOUND_STATUS).send({ message: 'Карточка не найдена!' });
+        return;
       }
-      return res.status(OK_STATUS).send(card);
+      res.status(OK_STATUS).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
