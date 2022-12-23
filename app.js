@@ -7,6 +7,8 @@ const router = require('./routes/index');
 const { PORT = 3000 } = process.env;
 const app = express();
 
+mongoose.set('strictQuery', false);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

@@ -1,6 +1,9 @@
 const User = require('../models/user');
 const {
-  OK_STATUS, NOT_FOUND_STATUS, BAD_REQUEST_STATUS, SERVER_ERROR_STATUS,
+  OK_STATUS,
+  NOT_FOUND_STATUS,
+  SERVER_ERROR_STATUS,
+  processCommonErr,
 } = require('../utils/errors');
 
 module.exports.getUsers = (req, res) => {
@@ -13,12 +16,7 @@ module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => res.status(OK_STATUS).send(user))
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_STATUS).send({ message: `Переданы некорректные данные в теле запроса. Подробнее: ${err}` });
-      }
-      return res.status(SERVER_ERROR_STATUS).send({ message: `Ошибка на сервере: ${err}` });
-    });
+    .catch((err) => processCommonErr(res, err));
 };
 
 module.exports.getUser = (req, res) => {
@@ -29,19 +27,13 @@ module.exports.getUser = (req, res) => {
       }
       return res.status(OK_STATUS).send(user);
     })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_STATUS).send({ message: `Переданы некорректные данные в теле запроса. Подробнее: ${err}` });
-      }
-      return res.status(SERVER_ERROR_STATUS).send({ message: `Ошибка на сервере: ${err}` });
-    });
+    .catch((err) => processCommonErr(res, err));
 };
 
 module.exports.updateProfile = (req, res) => {
-  const { name, about } = req.body;
-  if (!name || !about) {
-    return res.status(BAD_REQUEST_STATUS).send({ message: 'Переданы некорректные данные в теле запроса' });
-  }
+  let { name, about } = req.body;
+  name = (name === undefined) ? '' : name;
+  about = (about === undefined) ? '' : about;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
@@ -49,12 +41,7 @@ module.exports.updateProfile = (req, res) => {
       }
       return res.status(OK_STATUS).send(user);
     })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_STATUS).send({ message: `Переданы некорректные данные в теле запроса. Подробнее: ${err}` });
-      }
-      return res.status(SERVER_ERROR_STATUS).send({ message: `Ошибка на сервере: ${err}` });
-    });
+    .catch((err) => processCommonErr(res, err));
 };
 
 module.exports.updateAvatar = (req, res) => {
@@ -66,10 +53,5 @@ module.exports.updateAvatar = (req, res) => {
       }
       return res.status(OK_STATUS).send(user);
     })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_STATUS).send({ message: `Переданы некорректные данные в теле запроса. Подробнее: ${err}` });
-      }
-      return res.status(SERVER_ERROR_STATUS).send({ message: `Ошибка на сервере: ${err}` });
-    });
+    .catch((err) => processCommonErr(res, err));
 };

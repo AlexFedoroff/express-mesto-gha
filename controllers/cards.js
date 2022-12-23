@@ -1,6 +1,6 @@
 const Card = require('../models/card');
 const {
-  OK_STATUS, NOT_FOUND_STATUS, BAD_REQUEST_STATUS, SERVER_ERROR_STATUS,
+  OK_STATUS, NOT_FOUND_STATUS, SERVER_ERROR_STATUS, processCommonErr,
 } = require('../utils/errors');
 
 module.exports.getCards = (req, res) => {
@@ -16,12 +16,7 @@ module.exports.createCard = (req, res) => {
     name, link, owner: req.user._id, runValidators: true,
   })
     .then((card) => res.status(OK_STATUS).send({ card }))
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_STATUS).send({ message: `Переданы некорректные данные в теле запроса. Подробнее: ${err}` });
-      }
-      return res.status(SERVER_ERROR_STATUS).send({ message: `Ошибка на сервере: ${err}` });
-    });
+    .catch((err) => processCommonErr(res, err));
 };
 
 module.exports.deleteCard = (req, res) => {
@@ -33,12 +28,7 @@ module.exports.deleteCard = (req, res) => {
       }
       res.status(OK_STATUS).send(card);
     })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_STATUS).send({ message: `Переданы некорректные данные в параметре запроса. Подробнее: ${err}` });
-      }
-      return res.status(SERVER_ERROR_STATUS).send({ message: `Ошибка на сервере: ${err}` });
-    });
+    .catch((err) => processCommonErr(res, err));
 };
 
 module.exports.likeCard = (req, res) => {
@@ -56,12 +46,7 @@ module.exports.likeCard = (req, res) => {
       }
       res.status(OK_STATUS).send(card);
     })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_STATUS).send({ message: 'Некорректный ID карточки' });
-      }
-      return res.status(SERVER_ERROR_STATUS).send({ message: `Ошибка на сервере: ${err}` });
-    });
+    .catch((err) => processCommonErr(res, err, 'Некорректно передан ID карточки'));
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -79,10 +64,5 @@ module.exports.dislikeCard = (req, res) => {
       }
       res.status(OK_STATUS).send(card);
     })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_STATUS).send({ message: 'Некорректный ID карточки' });
-      }
-      return res.status(SERVER_ERROR_STATUS).send({ message: `Ошибка на сервере: ${err}` });
-    });
+    .catch((err) => processCommonErr(res, err, 'Некорректно передан ID карточки'));
 };
