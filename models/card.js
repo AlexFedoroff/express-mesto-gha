@@ -11,6 +11,7 @@ const cardSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
+    validate: isURL,
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -20,7 +21,7 @@ const cardSchema = new mongoose.Schema({
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
     default: [],
-    validate: isURL,
+    ref: 'user',
   }],
   createdAt: {
     type: Date,
