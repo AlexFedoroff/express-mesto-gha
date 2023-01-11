@@ -1,57 +1,109 @@
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
+const BadRequestError = require('../utils/bad-request-error');
+const ConflictError = require('../utils/conflict-error');
+const NotFoundError = require('../utils/not-found-error');
+const UnauthorizedError = require('../utils/unauthorized-error');
+
 const {
   OK_STATUS,
-  NOT_FOUND_STATUS,
-  SERVER_ERROR_STATUS,
-  processCommonErr,
 } = require('../utils/errors');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(OK_STATUS).send({ users }))
-    .catch((err) => res.status(SERVER_ERROR_STATUS).send({ message: `Ошибка на сервере: ${err}` }));
+    .catch((err) => next(err));
 };
 
-module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+module.exports.createUser = (req, res, next) => {
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => User.create({
+      email: req.body.email,
+      password: hash,
+    }))
     .then((user) => res.status(OK_STATUS).send(user))
-    .catch((err) => processCommonErr(res, err));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Некорректный запрос'));
+      } else if (err.code === 11000) {
+        next(new ConflictError('Такой Email уже используется'));
+      } else {
+        next(err);
+      }
+    });
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => res.send({
+      token: jwt.sign(
+        { _id: user._id },
+        'my-not-really-secret-key',
+        { expiresIn: '7d' },
+      ),
+    }))
+    .catch(() => next(new UnauthorizedError('Ошибка авторизации')));
+};
+
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND_STATUS).send({ message: 'Пользователь не найден' });
+        throw new NotFoundError('Пользователь с таким id не найден');
       }
       return res.status(OK_STATUS).send(user);
     })
-    .catch((err) => processCommonErr(res, err));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Некорректный запрос'));
+      } else {
+        next(err);
+      }
+    });
 };
 
-module.exports.updateProfile = (req, res) => {
+module.exports.getCurrentUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => res.send(user))
+    .catch((err) => next(err));
+};
+
+module.exports.updateProfile = (req, res, next) => {
   let { name, about } = req.body;
   name = (name === undefined) ? '' : name;
   about = (about === undefined) ? '' : about;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND_STATUS).send({ message: 'Пользователь не найден' });
+        throw new NotFoundError('Пользователь с указанным id не найден');
       }
-      return res.status(OK_STATUS).send(user);
+      res.status(OK_STATUS).send(user);
     })
-    .catch((err) => processCommonErr(res, err));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Некорректный запрос'));
+      } else {
+        next(err);
+      }
+    });
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND_STATUS).send({ message: 'Пользователь не найден' });
+        throw new NotFoundError('Пользователь с указанным id не найден');
       }
-      return res.status(OK_STATUS).send(user);
+      res.status(OK_STATUS).send(user);
     })
-    .catch((err) => processCommonErr(res, err));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Некорректный запрос'));
+      } else {
+        next(err);
+      }
+    });
 };

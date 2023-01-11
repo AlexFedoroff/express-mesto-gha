@@ -1,13 +1,17 @@
 const router = require('express').Router();
-const cardsRoutes = require('./cards');
+const auth = require('../middlewares/auth');
 const usersRoutes = require('./users');
+const cardsRoutes = require('./cards');
+const { login, createUser } = require('../controllers/users');
+const NotFoundError = require('../utils/not-found-error');
+const { loginValidate, registerValidate } = require('../middlewares/validation');
 
-const { NOT_FOUND_STATUS } = require('../utils/errors');
+router.post('/signup', registerValidate, createUser);
+router.post('/signin', loginValidate, login);
 
+router.use(auth);
 router.use('/users', usersRoutes);
 router.use('/cards', cardsRoutes);
-
-router.use('*', (req, res) => res.status(NOT_FOUND_STATUS)
-  .send({ message: '404 - Страница не найдена ' }));
+router.use('*', (req, res, next) => { next(new NotFoundError('404 - Страница не найдена')); });
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const OK_STATUS = 200;
+const UNAUTHORIZED = 401;
 const BAD_REQUEST_STATUS = 400;
 const NOT_FOUND_STATUS = 404;
 const SERVER_ERROR_STATUS = 500;
@@ -13,6 +14,7 @@ const processCommonErr = (res, err, errMsg = '') => {
 
 module.exports = {
   OK_STATUS,
+  UNAUTHORIZED,
   NOT_FOUND_STATUS,
   BAD_REQUEST_STATUS,
   SERVER_ERROR_STATUS,
