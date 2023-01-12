@@ -53,7 +53,12 @@ module.exports.getUser = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Пользователь с таким id не найден');
       }
-      return res.status(OK_STATUS).send(user);
+      return res.status(OK_STATUS).send({
+        _id: user.id,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+      });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -69,7 +74,7 @@ module.exports.getCurrentUser = (req, res, next) => {
     .orFail(() => {
       throw new NotFoundError('Пользователь с таким id не найден');
     })
-    .then((user) => res.send(user))
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Некорректный id пользователя'));
@@ -82,19 +87,17 @@ module.exports.getCurrentUser = (req, res, next) => {
 };
 
 module.exports.updateProfile = (req, res, next) => {
-  let { name, about } = req.body;
-  name = (name === undefined) ? '' : name;
-  about = (about === undefined) ? '' : about;
+  const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Пользователь с указанным id не найден');
       }
-      res.status(OK_STATUS).send(user);
+      res.status(OK_STATUS).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError('Некорректный запрос'));
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные профиля'));
       } else {
         next(err);
       }
@@ -108,7 +111,7 @@ module.exports.updateAvatar = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Пользователь с указанным id не найден');
       }
-      res.status(OK_STATUS).send(user);
+      res.status(OK_STATUS).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
