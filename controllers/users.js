@@ -7,8 +7,8 @@ const NotFoundError = require('../utils/not-found-error');
 const UnauthorizedError = require('../utils/unauthorized-error');
 
 const {
-  OK_STATUS,
-} = require('../utils/errors');
+  OK_STATUS, SECRET_KEY,
+} = require('../utils/constants');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -40,11 +40,11 @@ module.exports.login = (req, res, next) => {
     .then((user) => res.send({
       token: jwt.sign(
         { _id: user._id },
-        'my-not-really-secret-key',
+        SECRET_KEY,
         { expiresIn: '7d' },
       ),
     }))
-    .catch(() => next(new UnauthorizedError('Ошибка авторизации')));
+    .catch((err) => next(new UnauthorizedError(err.message)));
 };
 
 module.exports.getUser = (req, res, next) => {
@@ -66,8 +66,19 @@ module.exports.getUser = (req, res, next) => {
 
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
+    .orFail(() => {
+      throw new NotFoundError('Пользователь с таким id не найден');
+    })
     .then((user) => res.send(user))
-    .catch((err) => next(err));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Некорректный id пользователя'));
+      } else if (err.name === 'NotFoundError') {
+        next(new NotFoundError('Пользователь c таким id не найден'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.updateProfile = (req, res, next) => {

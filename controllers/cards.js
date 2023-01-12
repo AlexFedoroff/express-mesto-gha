@@ -3,7 +3,7 @@ const NotFoundError = require('../utils/not-found-error');
 const ForbiddenError = require('../utils/forbidden-error');
 
 const Card = require('../models/card');
-const { OK_STATUS } = require('../utils/errors');
+const { OK_STATUS } = require('../utils/constants');
 
 const getCards = (req, res, next) => {
   Card.find({})
@@ -48,10 +48,10 @@ const deleteCard = (req, res, next) => {
     });
 };
 
-const likeCard = (req, res, next) => {
+const handleLikeCard = (method, req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $addToSet: { likes: req.user._id } },
+    { [method]: { likes: req.user._id } },
     { new: true, runValidators: true },
   )
     .orFail(() => {
@@ -69,27 +69,12 @@ const likeCard = (req, res, next) => {
     });
 };
 
+const likeCard = (req, res, next) => {
+  handleLikeCard('$addToSet', req, res, next);
+};
+
 const dislikeCard = (req, res, next) => {
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    {
-      $pull: { likes: req.user._id },
-    },
-    { new: true },
-  )
-    .then((card) => {
-      if (!card) {
-        next(new NotFoundError('Карточка с указанным id не найдена'));
-      }
-      res.status(OK_STATUS).send(card);
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Передан некорректный id карточки'));
-      } else {
-        next(err);
-      }
-    });
+  handleLikeCard('$pull', req, res, next);
 };
 
 module.exports = {

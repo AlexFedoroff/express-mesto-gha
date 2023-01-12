@@ -1,5 +1,3 @@
-const bodyParser = require('body-parser');
-
 const router = require('express').Router();
 const auth = require('../middlewares/auth');
 const usersRoutes = require('./users');
@@ -15,6 +13,5 @@ router.use(auth);
 router.use('/users', usersRoutes);
 router.use('/cards', cardsRoutes);
 router.use('*', (req, res, next) => { next(new NotFoundError('404 - Страница не найдена')); });
-router.use(bodyParser.json());
 
 module.exports = router;

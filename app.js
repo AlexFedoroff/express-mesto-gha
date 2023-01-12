@@ -1,4 +1,3 @@
-// const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -11,16 +10,16 @@ const app = express();
 
 mongoose.set('strictQuery', false);
 
-// app.use(bodyParser.json());
-// app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-mongoose.connect('mongodb://localhost:27017/mestodb');
+app.use(bodyParser.json());
 
 app.use(router);
 app.use(errors());
 app.use(error);
-// app.use(express.static(path.join(__dirname, 'public')));
+
+mongoose
+  .connect('mongodb://localhost:27017/mestodb', {
+    useUnifiedTopology: true, useNewUrlParser: true, autoIndex: true,
+  });
 
 app.listen(PORT, () => {
 });
