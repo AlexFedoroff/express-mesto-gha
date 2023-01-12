@@ -74,7 +74,7 @@ module.exports.getCurrentUser = (req, res, next) => {
     .orFail(() => {
       throw new NotFoundError('Пользователь с таким id не найден');
     })
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Некорректный id пользователя'));
@@ -93,7 +93,7 @@ module.exports.updateProfile = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Пользователь с указанным id не найден');
       }
-      res.status(OK_STATUS).send({ data: user });
+      res.status(OK_STATUS).send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
@@ -111,7 +111,7 @@ module.exports.updateAvatar = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Пользователь с указанным id не найден');
       }
-      res.status(OK_STATUS).send({ data: user });
+      res.status(OK_STATUS).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
