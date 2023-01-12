@@ -5,7 +5,7 @@ const ForbiddenError = require('../utils/forbidden-error');
 const Card = require('../models/card');
 const { OK_STATUS } = require('../utils/constants');
 
-const getCards = (req, res, next) => {
+const getCards = (_, res, next) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
     .catch(next);

@@ -10,13 +10,13 @@ const {
   OK_STATUS, SECRET_KEY,
 } = require('../utils/constants');
 
-module.exports.getUsers = (req, res, next) => {
+const getUsers = (_, res, next) => {
   User.find({})
     .then((users) => res.status(OK_STATUS).send({ users }))
     .catch((err) => next(err));
 };
 
-module.exports.createUser = (req, res, next) => {
+const createUser = (req, res, next) => {
   bcrypt.hash(req.body.password, 10)
     .then((hash) => User.create({
       name: req.body.name,
@@ -36,14 +36,14 @@ module.exports.createUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Некорректный запрос'));
       } else if (err.code === 11000) {
-        next(new ConflictError('Такой Email уже используется'));
+        next(new ConflictError('Такой email уже используется'));
       } else {
         next(err);
       }
     });
 };
 
-module.exports.login = (req, res, next) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => res.send({
@@ -56,8 +56,8 @@ module.exports.login = (req, res, next) => {
     .catch((err) => next(new UnauthorizedError(err.message)));
 };
 
-module.exports.getUser = (req, res, next) => {
-  User.findById(req.params.userId)
+const getUserById = (userId, res, next) => {
+  User.findById(userId)
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Пользователь с таким id не найден');
@@ -72,37 +72,22 @@ module.exports.getUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError('Некорректный запрос'));
-      } else {
-        next(err);
-      }
-    });
-};
-
-module.exports.getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id)
-    .orFail(() => {
-      throw new NotFoundError('Пользователь с таким id не найден');
-    })
-    .then((user) => res.send({
-      _id: user.id,
-      name: user.name,
-      about: user.about,
-      avatar: user.avatar,
-      email: user.email,
-    }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
         next(new BadRequestError('Некорректный id пользователя'));
-      } else if (err.name === 'NotFoundError') {
-        next(new NotFoundError('Пользователь c таким id не найден'));
       } else {
         next(err);
       }
     });
 };
 
-module.exports.updateProfile = (req, res, next) => {
+const getUser = (req, res, next) => {
+  getUserById(req.params.userId, res, next);
+};
+
+const getCurrentUser = (req, res, next) => {
+  getUserById(req.user._id, res, next);
+};
+
+const updateProfile = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
@@ -120,7 +105,7 @@ module.exports.updateProfile = (req, res, next) => {
     });
 };
 
-module.exports.updateAvatar = (req, res, next) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
@@ -136,4 +121,14 @@ module.exports.updateAvatar = (req, res, next) => {
         next(err);
       }
     });
+};
+
+module.exports = {
+  getUsers,
+  createUser,
+  login,
+  getUser,
+  getCurrentUser,
+  updateProfile,
+  updateAvatar,
 };

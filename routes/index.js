@@ -12,6 +12,6 @@ router.post('/signin', loginValidate, login);
 router.use(auth);
 router.use('/users', usersRoutes);
 router.use('/cards', cardsRoutes);
-router.use('*', (req, res, next) => { next(new NotFoundError('404 - Страница не найдена')); });
+router.use('*', (_, __, next) => { next(new NotFoundError('404 - Страница не найдена')); });
 
 module.exports = router;

@@ -1,4 +1,4 @@
-const error = (err, req, res, next) => {
+const error = (err, _, res, next) => {
   const { statusCode = 500, message } = err;
 
   res.status(statusCode).send({
