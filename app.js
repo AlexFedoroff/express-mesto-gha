@@ -8,6 +8,7 @@ const error = require('./middlewares/error');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
+
 // const allowedOrigins = ['http://localhost:5173'];
 const app = express();
 
