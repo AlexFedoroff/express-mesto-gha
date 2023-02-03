@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
-// const cors = require('cors');
+const cors = require('cors');
 const router = require('./routes/index');
 const error = require('./middlewares/error');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -15,11 +15,9 @@ const app = express();
 mongoose.set('strictQuery', false);
 
 app.use(requestLogger);
-/*
-app.use(cors({
-  origin: allowedOrigins,
-}));
-*/
+
+app.use(cors);
+
 app.use(bodyParser.json());
 
 app.use(router);
